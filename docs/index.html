@@ -47,6 +47,10 @@
     .hero p { max-width: 650px; margin: 18px 0 0; color: var(--muted); font-size: 16px; }
     .hero-badge { flex: 0 0 auto; padding: 12px 15px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: rgba(255, 254, 250, .7); font-size: 12px; }
     .hero-badge strong { color: var(--ink); }
+    .explanation { margin: 0 0 18px; padding: 20px 23px; border: 1px solid #d9e8dc; border-radius: 18px; background: linear-gradient(110deg, #eaf5ec, #fffefa 75%); }
+    .explanation h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
+    .explanation p { max-width: 980px; margin: 7px 0 0; color: #53645a; font-size: 13px; }
+    .explanation strong { color: var(--green-dark); }
     .loading { padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); color: var(--muted); }
     .error { color: #9d422e; }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
@@ -145,6 +149,11 @@
           <p>Explore a year of retail activity, compare product performance, and see how a simple forecast holds up against recent sales.</p>
         </div>
         <div class="hero-badge"><strong>Historical data</strong><br>Dec 2010 — Dec 2011</div>
+      </section>
+
+      <section class="explanation" aria-labelledby="explanation-title">
+        <h2 id="explanation-title">What this website does</h2>
+        <p>It summarizes past online retail orders so you can compare products and sales over time. Choose <strong>revenue</strong> or <strong>units sold</strong>, then the forecasting model estimates that same measure for each of the next <strong>1–12 weeks</strong>. The estimate uses historical weekly patterns; it is a planning aid, not a guarantee of future sales.</p>
       </section>
 
       <div id="loading" class="loading">Loading the prepared sales dataset…</div>
