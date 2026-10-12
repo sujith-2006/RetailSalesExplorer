@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore historical online retail sales and compare weekly demand forecasts.">
+  <meta name="theme-color" content="#f5f5ef">
+  <title>Retail Sales Explorer</title>
+  <style>
+    :root {
+      --ink: #17241f;
+      --muted: #68766f;
+      --paper: #f5f5ef;
+      --card: #fffefa;
+      --line: #e5e8df;
+      --green: #1e644c;
+      --green-dark: #164936;
+      --mint: #dff2e8;
+      --lime: #d4ed72;
+      --orange: #d88752;
+      --shadow: 0 18px 50px rgba(23, 36, 31, .06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 82% 0%, rgba(212, 237, 114, .15), transparent 36rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button, select, input { font: inherit; }
+    .page { width: min(1320px, calc(100% - 48px)); margin: 0 auto; }
+    header {
+      height: 82px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(23, 36, 31, .09);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.03em; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--green); }
+    .brand-mark svg { width: 19px; height: 19px; }
+    .header-meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #54a97e; box-shadow: 0 0 0 4px #e1f2e8; }
+    .hero { padding: 58px 0 36px; display: flex; align-items: end; justify-content: space-between; gap: 28px; }
+    .eyebrow { margin: 0 0 13px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(42px, 6vw, 70px); font-weight: 500; letter-spacing: -.055em; line-height: .99; }
+    .hero p { max-width: 650px; margin: 18px 0 0; color: var(--muted); font-size: 16px; }
+    .hero-badge { flex: 0 0 auto; padding: 12px 15px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: rgba(255, 254, 250, .7); font-size: 12px; }
+    .hero-badge strong { color: var(--ink); }
+    .loading { padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); color: var(--muted); }
+    .error { color: #9d422e; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+    .stat, .panel { border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: var(--shadow); }
+    .stat { min-height: 126px; padding: 21px 23px; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 650; }
+    .stat-value { margin-top: 10px; font-size: clamp(22px, 2.8vw, 32px); font-weight: 750; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+    .stat-note { margin-top: 2px; color: #8a958e; font-size: 11px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(290px, .85fr); gap: 18px; align-items: start; }
+    .main-column, .side-column { display: grid; gap: 18px; }
+    .panel { padding: 25px; }
+    .panel-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+    .panel h2 { margin: 0; font-size: 19px; letter-spacing: -.035em; }
+    .panel-subtitle { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .chart-legend { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .legend-item { display: inline-flex; align-items: center; gap: 7px; }
+    .legend-line { width: 18px; height: 2px; background: var(--green); }
+    .legend-line.dashed { background: repeating-linear-gradient(90deg, var(--orange) 0 5px, transparent 5px 8px); }
+    .chart-wrap { margin-top: 20px; min-height: 285px; }
+    .chart-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .axis-label { fill: #87928b; font-size: 11px; font-family: inherit; }
+    .grid-line { stroke: #edf0e9; stroke-width: 1; }
+    .actual-line { fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .forecast-line { fill: none; stroke: var(--orange); stroke-width: 3; stroke-dasharray: 7 6; stroke-linecap: round; stroke-linejoin: round; }
+    .forecast-dot { fill: var(--orange); stroke: var(--card); stroke-width: 3; }
+    .chart-empty { min-height: 250px; display: grid; place-items: center; color: var(--muted); }
+    .control-group { margin-top: 23px; }
+    .control-group:first-of-type { margin-top: 20px; }
+    .control-label { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
+    select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; outline: none; color: var(--ink); background: #fff; }
+    select:focus, input:focus-visible { outline: 3px solid rgba(30, 100, 76, .18); border-color: var(--green); }
+    input[type="range"] { width: 100%; accent-color: var(--green); }
+    .range-meta { display: flex; justify-content: space-between; color: #87928b; font-size: 10px; }
+    .filter-summary { margin-top: 19px; padding: 13px 14px; border-radius: 12px; color: var(--green-dark); background: var(--mint); font-size: 11px; }
+    .product-list { margin-top: 19px; display: grid; gap: 15px; }
+    .product-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+    .product-name { overflow: hidden; color: #435148; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .product-value { color: var(--ink); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .bar-track { grid-column: 1 / -1; height: 5px; overflow: hidden; border-radius: 5px; background: #edf0e9; }
+    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #347d5c, #a9d07b); }
+    .forecast-score { margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .score-card { padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: #fbfcf8; }
+    .score-title { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .score-number { margin-top: 4px; font-size: 19px; font-weight: 760; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .score-unit { color: var(--muted); font-size: 10px; }
+    .comparison { margin-top: 13px; padding: 13px 14px; border-radius: 13px; background: #f1f4ec; }
+    .comparison strong { display: block; font-size: 12px; }
+    .comparison span { color: var(--muted); font-size: 11px; }
+    .comparison.winner { background: var(--mint); }
+    .forecast-table { width: 100%; margin-top: 18px; border-collapse: collapse; font-size: 12px; }
+    .forecast-table th, .forecast-table td { padding: 11px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+    .forecast-table th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
+    .forecast-table td:last-child, .forecast-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .method { margin: 18px 0 0; padding: 0; border-top: 1px solid var(--line); }
+    .method summary { padding-top: 15px; color: var(--green); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .method p { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 38px; color: #87928b; font-size: 11px; }
+    footer a { color: var(--green); text-decoration: none; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .page { width: min(100% - 28px, 1320px); }
+      header { height: 68px; }
+      .hero { padding: 40px 0 25px; display: block; }
+      .hero-badge { display: inline-block; margin-top: 20px; }
+      .stats { gap: 9px; }
+      .stat { min-height: 105px; padding: 15px; border-radius: 15px; }
+      .stat-value { font-size: 23px; }
+      .panel { padding: 19px; border-radius: 16px; }
+      .side-column { grid-template-columns: 1fr; }
+      .chart-legend { flex-direction: column; align-items: flex-start; gap: 5px; }
+      footer { display: block; line-height: 1.8; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V11M10 18V6M16 18v-4M22 18V3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <span>Retail Signals</span>
+      </div>
+      <div class="header-meta"><span class="status-dot"></span><span id="status">Preparing sales data</span></div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Predictive analytics · UCI online retail</p>
+          <h1>See what’s moving.<br>Plan what’s next.</h1>
+          <p>Explore a year of retail activity, compare product performance, and see how a simple forecast holds up against recent sales.</p>
+        </div>
+        <div class="hero-badge"><strong>Historical data</strong><br>Dec 2010 — Dec 2011</div>
+      </section>
+
+      <div id="loading" class="loading">Loading the prepared sales dataset…</div>
+      <div id="app" hidden>
+        <section class="stats" aria-label="Sales summary">
+          <article class="stat"><div class="stat-label">Revenue</div><div class="stat-value" id="revenue-stat">—</div><div class="stat-note">GBP · selected products</div></article>
+          <article class="stat"><div class="stat-label">Units sold</div><div class="stat-value" id="units-stat">—</div><div class="stat-note">Positive quantity transactions</div></article>
+          <article class="stat"><div class="stat-label">Active products</div><div class="stat-value" id="product-stat">—</div><div class="stat-note">Within the selected view</div></article>
+          <article class="stat"><div class="stat-label">Weeks covered</div><div class="stat-value" id="weeks-stat">—</div><div class="stat-note" id="period-stat">—</div></article>
+        </section>
+
+        <div class="layout">
+          <div class="main-column">
+            <section class="panel">
+              <div class="panel-head">
+                <div><h2 id="history-title">Weekly revenue</h2><p class="panel-subtitle">Actual sales and the selected forecast horizon</p></div>
+                <div class="chart-legend"><span class="legend-item"><i class="legend-line"></i>Historical</span><span class="legend-item"><i class="legend-line dashed"></i>Forecast</span></div>
+              </div>
+              <div id="sales-chart" class="chart-wrap" role="img" aria-label="Weekly sales chart"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><div><h2>Forecast check</h2><p class="panel-subtitle" id="validation-caption">Predictions for recent weeks held out of training</p></div></div>
+              <div class="forecast-score" id="scores"></div>
+              <div class="comparison" id="comparison"></div>
+              <table class="forecast-table">
+                <thead><tr><th>Forecast week</th><th id="forecast-column-title">Revenue (GBP)</th></tr></thead>
+                <tbody id="forecast-rows"></tbody>
+              </table>
+              <details class="method">
+                <summary>How this forecast works</summary>
+                <p>Exponential smoothing updates its estimate using recent sales and a trend. The validation scores compare predictions with the last eight historical weeks. The baseline repeats the last training week for every forecast week. Lower MAE and RMSE mean smaller errors. Returns and cancelled transactions are excluded from the demand series.</p>
+              </details>
+            </section>
+          </div>
+
+          <aside class="side-column">
+            <section class="panel">
+              <div class="panel-head"><div><h2>Explore the data</h2><p class="panel-subtitle">Adjust the view and forecast</p></div></div>
+              <div class="control-group">
+                <label class="control-label" for="product-select">Product</label>
+                <select id="product-select" aria-label="Select product"></select>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="metric-select">Measure</label>
+                <select id="metric-select"><option value="Revenue">Revenue (GBP)</option><option value="Units">Units sold</option></select>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="horizon"><span>Forecast horizon</span><span><b id="horizon-value">4</b> weeks</span></label>
+                <input id="horizon" type="range" min="1" max="12" value="4">
+                <div class="range-meta"><span>1 week</span><span>12 weeks</span></div>
+              </div>
+              <div class="filter-summary" id="filter-summary">Returns and cancelled transactions are excluded.</div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><div><h2>Top products</h2><p class="panel-subtitle">Ranked by total revenue</p></div></div>
+              <div id="top-products" class="product-list"></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer><span>Course project · Predictive Analytics</span><span>Source: <a href="https://archive.ics.uci.edu/dataset/352/online%2Bretail" target="_blank" rel="noreferrer">UCI Machine Learning Repository</a></span></footer>
+  </div>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+    let dataset;
+
+    const money = (value) => {
+      const abs = Math.abs(value);
+      if (abs >= 1_000_000) return `£${(value / 1_000_000).toFixed(2)}m`;
+      if (abs >= 10_000) return `£${(value / 1_000).toFixed(1)}k`;
+      return `£${value.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`;
+    };
+    const number = (value) => Math.round(value).toLocaleString("en-GB");
+    const metricLabel = () => byId("metric-select").value === "Revenue" ? "Revenue (GBP)" : "Units sold";
+    const metricFormat = (value) => byId("metric-select").value === "Revenue" ? money(value) : number(value);
+    const weekDate = (iso) => new Date(`${iso}T00:00:00Z`);
+    const dateLabel = (iso, options = { day: "numeric", month: "short" }) =>
+      weekDate(iso).toLocaleDateString("en-GB", { ...options, timeZone: "UTC" });
+
+    function makeSeries(productId, metric) {
+      const values = new Array(dataset.weeks.length).fill(0);
+      for (const [weekId, rowProductId, revenue, units] of dataset.rows) {
+        if (productId === "all" || Number(productId) === rowProductId) {
+          values[weekId] += metric === "Revenue" ? revenue : units;
+        }
+      }
+      return values;
+    }
+
+    function holtForecast(values, horizon) {
+      // A small grid search chooses alpha and beta by one-step training error.
+      let best = { error: Infinity, level: values[0], trend: 0 };
+      for (let alphaStep = 1; alphaStep <= 19; alphaStep++) {
+        const alpha = alphaStep / 20;
+        for (let betaStep = 1; betaStep <= 19; betaStep++) {
+          const beta = betaStep / 20;
+          let level = values[0];
+          let trend = values[1] - values[0];
+          let error = 0;
+          for (let i = 1; i < values.length; i++) {
+            const prediction = level + trend;
+            error += (values[i] - prediction) ** 2;
+            const nextLevel = alpha * values[i] + (1 - alpha) * (level + trend);
+            trend = beta * (nextLevel - level) + (1 - beta) * trend;
+            level = nextLevel;
+          }
+          if (error < best.error) best = { error, level, trend };
+        }
+      }
+      return Array.from({ length: horizon }, (_, i) => Math.max(0, best.level + (i + 1) * best.trend));
+    }
+
+    function score(actual, predicted) {
+      const errors = actual.map((value, index) => value - predicted[index]);
+      return {
+        mae: errors.reduce((sum, value) => sum + Math.abs(value), 0) / errors.length,
+        rmse: Math.sqrt(errors.reduce((sum, value) => sum + value * value, 0) / errors.length),
+      };
+    }
+
+    function createSvgChart(actual, predicted, weeks) {
+      const width = 900, height = 320;
+      const left = 68, right = 18, top = 14, bottom = 39;
+      const innerWidth = width - left - right, innerHeight = height - top - bottom;
+      const all = [...actual, ...predicted];
+      const maxValue = Math.max(...all, 1) * 1.12;
+      const x = (index) => left + (all.length <= 1 ? 0 : index / (all.length - 1)) * innerWidth;
+      const y = (value) => top + innerHeight - (value / maxValue) * innerHeight;
+      const pathFor = (values, startIndex = 0) => values.map((value, i) => `${i === 0 ? "M" : "L"}${x(startIndex + i).toFixed(1)},${y(value).toFixed(1)}`).join(" ");
+      let grid = "";
+      for (let i = 0; i <= 4; i++) {
+        const value = maxValue * (1 - i / 4);
+        const gy = y(value);
+        const label = byId("metric-select").value === "Revenue" ? money(value) : number(value);
+        grid += `<line class="grid-line" x1="${left}" y1="${gy}" x2="${width - right}" y2="${gy}"/><text class="axis-label" x="${left - 10}" y="${gy + 4}" text-anchor="end">${label}</text>`;
+      }
+      const labelIndices = [...new Set([0, Math.floor((weeks.length - 1) / 2), weeks.length - 1])];
+      let xLabels = "";
+      for (const i of labelIndices) {
+        const anchor = i === 0 ? "start" : i === weeks.length - 1 ? "end" : "middle";
+        xLabels += `<text class="axis-label" x="${x(i)}" y="${height - 10}" text-anchor="${anchor}">${dateLabel(weeks[i], { month: "short", year: "2-digit" })}</text>`;
+      }
+      const forecastPath = `${pathFor([actual[actual.length - 1], ...predicted], actual.length - 1)}`;
+      const dots = predicted.map((value, index) => `<circle class="forecast-dot" cx="${x(actual.length + index)}" cy="${y(value)}" r="4.5"/>`).join("");
+      return `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">${grid}<path class="actual-line" d="${pathFor(actual)}"/><path class="forecast-line" d="${forecastPath}"/>${dots}${xLabels}</svg>`;
+    }
+
+    function renderTopProducts() {
+      const totals = new Map();
+      for (const [, productId, revenue] of dataset.rows) {
+        totals.set(productId, (totals.get(productId) || 0) + revenue);
+      }
+      const ranked = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const max = ranked[0]?.[1] || 1;
+      const root = byId("top-products");
+      root.replaceChildren();
+      for (const [productId, revenue] of ranked) {
+        const row = document.createElement("div");
+        row.className = "product-row";
+        const name = document.createElement("span");
+        name.className = "product-name";
+        name.textContent = dataset.products[productId];
+        name.title = dataset.products[productId];
+        const value = document.createElement("span");
+        value.className = "product-value";
+        value.textContent = money(revenue);
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = `${(revenue / max) * 100}%`;
+        track.append(fill);
+        row.append(name, value, track);
+        root.append(row);
+      }
+    }
+
+    function render() {
+      const productId = byId("product-select").value;
+      const metric = byId("metric-select").value;
+      const horizon = Number(byId("horizon").value);
+      const selectedRows = productId === "all"
+        ? dataset.rows
+        : dataset.rows.filter((row) => row[1] === Number(productId));
+      const revenue = selectedRows.reduce((sum, row) => sum + row[2], 0);
+      const units = selectedRows.reduce((sum, row) => sum + row[3], 0);
+      const activeProducts = new Set(selectedRows.map((row) => row[1])).size;
+      const values = makeSeries(productId, metric);
+      const holdoutLength = Math.min(8, Math.max(4, Math.floor(values.length / 5)));
+      const train = values.slice(0, -holdoutLength);
+      const actual = values.slice(-holdoutLength);
+      const modelValidation = holtForecast(train, holdoutLength);
+      const baselineValidation = new Array(holdoutLength).fill(train[train.length - 1]);
+      const modelScore = score(actual, modelValidation);
+      const baselineScore = score(actual, baselineValidation);
+      const forecast = holtForecast(values, horizon);
+
+      byId("revenue-stat").textContent = money(revenue);
+      byId("units-stat").textContent = number(units);
+      byId("product-stat").textContent = number(activeProducts);
+      byId("weeks-stat").textContent = number(values.length);
+      byId("period-stat").textContent = `${dateLabel(dataset.weeks[0])} — ${dateLabel(dataset.weeks.at(-1))}`;
+      byId("history-title").textContent = `Weekly ${metricLabel().toLowerCase()}`;
+      byId("horizon-value").textContent = horizon;
+      byId("forecast-column-title").textContent = metricLabel();
+      byId("filter-summary").textContent = productId === "all"
+        ? "All products · returns and cancelled transactions excluded"
+        : `${dataset.products[Number(productId)]} · returns and cancellations excluded`;
+
+      const futureWeeks = forecast.map((_, index) => {
+        const date = weekDate(dataset.weeks.at(-1));
+        date.setUTCDate(date.getUTCDate() + 7 * (index + 1));
+        return date.toISOString().slice(0, 10);
+      });
+      const chartWeeks = [...dataset.weeks, ...futureWeeks];
+      byId("sales-chart").innerHTML = createSvgChart(values, forecast, chartWeeks);
+
+      byId("scores").innerHTML = `
+        <div><div class="score-title">Exponential · MAE</div><div class="score-card"><div class="score-number">${metricFormat(modelScore.mae)}</div><span class="score-unit">average absolute error</span></div></div>
+        <div><div class="score-title">Exponential · RMSE</div><div class="score-card"><div class="score-number">${metricFormat(modelScore.rmse)}</div><span class="score-unit">penalizes larger misses</span></div></div>
+        <div><div class="score-title">Baseline · MAE</div><div class="score-card"><div class="score-number">${metricFormat(baselineScore.mae)}</div><span class="score-unit">last week repeated</span></div></div>
+        <div><div class="score-title">Baseline · RMSE</div><div class="score-card"><div class="score-number">${metricFormat(baselineScore.rmse)}</div><span class="score-unit">last week repeated</span></div></div>`;
+
+      const modelWins = modelScore.mae < baselineScore.mae;
+      const difference = baselineScore.mae > 0
+        ? Math.abs((baselineScore.mae - modelScore.mae) / baselineScore.mae) * 100
+        : 0;
+      byId("comparison").className = `comparison${modelWins ? " winner" : ""}`;
+      byId("comparison").innerHTML = modelWins
+        ? `<strong>Exponential smoothing had lower MAE</strong><span>It reduced average error by ${difference.toFixed(1)}% versus the baseline on the held-out weeks.</span>`
+        : `<strong>The naive baseline had lower MAE</strong><span>For this selection, repeating the last week was more accurate on the held-out weeks.</span>`;
+
+      const body = byId("forecast-rows");
+      body.replaceChildren();
+      futureWeeks.forEach((week, index) => {
+        const row = document.createElement("tr");
+        const dateCell = document.createElement("td");
+        const valueCell = document.createElement("td");
+        dateCell.textContent = dateLabel(week, { day: "numeric", month: "short", year: "numeric" });
+        valueCell.textContent = metricFormat(forecast[index]);
+        row.append(dateCell, valueCell);
+        body.append(row);
+      });
+    }
+
+    async function start() {
+      try {
+        const response = await fetch("./data/sales.json");
+        if (!response.ok) throw new Error("Could not load the prepared sales data.");
+        dataset = await response.json();
+
+        const totals = new Map();
+        for (const [, productId, revenue] of dataset.rows) {
+          totals.set(productId, (totals.get(productId) || 0) + revenue);
+        }
+        const topIds = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
+        const select = byId("product-select");
+        const all = document.createElement("option");
+        all.value = "all";
+        all.textContent = "All products";
+        select.append(all);
+        for (const [productId] of topIds) {
+          const option = document.createElement("option");
+          option.value = productId;
+          option.textContent = dataset.products[productId];
+          select.append(option);
+        }
+
+        byId("loading").hidden = true;
+        byId("app").hidden = false;
+        byId("status").textContent = "Sales data ready";
+        renderTopProducts();
+        render();
+        ["product-select", "metric-select", "horizon"].forEach((id) => {
+          byId(id).addEventListener("input", render);
+          byId(id).addEventListener("change", render);
+        });
+      } catch (error) {
+        byId("loading").classList.add("error");
+        byId("loading").textContent = `${error.message} Run scripts/prepare_data.py and serve the docs folder, or check that docs/data/sales.json exists.`;
+        byId("status").textContent = "Data unavailable";
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>
