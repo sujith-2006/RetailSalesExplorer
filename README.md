@@ -1,32 +1,51 @@
 # Retail Sales Explorer
 
-A responsive dashboard for exploring retail sales and comparing short term forecasts with a simple baseline. The public site is a static GitHub Pages website; visitors do not need Python or an account to use it.
+An interactive dashboard that explores clothing sales from an Amazon India dataset and estimates sales for the coming weeks.
 
-The dashboard is tailored to the Indian Amazon Sale Report. It groups orders by readable clothing category and forecasts weekly revenue in Indian rupees or units sold. Visitors choose a category, what they want to forecast, and how many weeks ahead. The page then shows the estimated total, next week's estimate, recent direction, and a chart. The forecast is a planning estimate, not a guarantee.
+**Live website:** [sujith-2006.github.io/RetailSalesExplorer](https://sujith-2006.github.io/RetailSalesExplorer/)
 
-## Features
+## What the website does
 
-- Explore weekly revenue or units for all categories or one chosen category.
-- Forecast between one and twelve weeks with damped-trend Holt exponential smoothing, which softens the recent trend further into the future.
-- Compare MAE and RMSE on recent held-out weeks against a last-week-repeated baseline.
-- Use the site on desktop, tablet, or mobile screens.
+Choose a product category, a measure, and how many weeks ahead to forecast. The dashboard shows:
 
-## Prepare the data
+- **Revenue (₹):** estimated sales value in Indian rupees.
+- **Units sold:** estimated number of items sold.
+- **Forecast summary:** the estimated total across the selected weeks, next week's estimate, and whether the recent pattern is rising or easing.
+- **Chart:** past weekly sales followed by the forecast.
 
-For the India focused dashboard, download **Amazon Sale Report.csv** from [Kaggle's E-Commerce Sales Dataset](https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data) and place it at `data/Amazon Sale Report.csv`. It contains order dates, product categories, quantities, amounts, and Indian shipping locations. Then run:
+These are estimates based on past sales. They are useful for exploring patterns, but they are not guaranteed results.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python scripts/prepare_data.py
-```
+## How the forecast works
 
-The script creates `docs/data/sales.json`, a compact weekly summary used by the browser app. It excludes cancelled, returned, rejected, lost, or refunded orders and incomplete first or last weeks. The raw CSV is not included in the repository; follow Kaggle's dataset terms when using or sharing it.
+The project groups order records into weekly totals, then uses **damped-trend Holt exponential smoothing** to forecast those totals. In simple terms, the model looks at the recent sales level and whether sales have been moving up or down. It carries that direction into the forecast, while gradually reducing its effect further into the future.
 
-If `data/Amazon Sale Report.csv` is not present, the script falls back to the original UCI Online Retail dataset. Download it from the [UCI dataset page](https://archive.ics.uci.edu/dataset/352/online%2Bretail) and save it as `data/Online Retail.xlsx`.
+The dashboard also checks the model against recent weeks that were held back from fitting. It reports **MAE** and **RMSE**, two measures of prediction error. Smaller values mean the estimates were closer to actual sales. A simple “repeat the last observed week” forecast is included as a baseline for comparison.
 
-## Run locally
+## Dataset and preparation
+
+The dashboard uses the [Amazon Sale Report dataset on Kaggle](https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data). The source file contains order dates, product categories, quantities, and amounts.
+
+To prepare the data:
+
+1. Download `Amazon Sale Report.csv` from Kaggle.
+2. Put it in the project's `data` folder, using this exact filename:
+
+   ```text
+   data/Amazon Sale Report.csv
+   ```
+
+3. From the project folder, create an environment, install the required packages, and prepare the weekly data:
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   python scripts/prepare_data.py
+   ```
+
+The preparation script removes cancelled and other excluded orders, leaves out incomplete first and last weeks, and writes a smaller summary file to `docs/data/sales.json`. The original CSV is not included in this repository; follow the dataset's terms when downloading or sharing it.
+
+## Run the website on your computer
 
 From the project folder, run:
 
@@ -34,17 +53,17 @@ From the project folder, run:
 python3 -m http.server 8000 --directory docs
 ```
 
-Open <http://localhost:8000> in a browser. The site must be served over HTTP; opening `index.html` directly from Finder will prevent the browser from loading its JSON data file.
+Then open [http://localhost:8000](http://localhost:8000). The site needs to be served this way so it can load its sales data.
 
 ## Publish with GitHub Pages
 
-Push the project to a GitHub repository. In the repository, open **Settings → Pages**, select **Deploy from a branch**, choose the `main` branch and the `/docs` folder, then save. GitHub will provide the public site URL. For a repository named `<username>.github.io`, the URL is `https://<username>.github.io/`; other repositories use `https://<username>.github.io/<repository>/`.
+The live website is hosted by GitHub Pages from the repository's `main` branch and `/docs` folder. After pushing changes to `main`, GitHub Pages updates the site automatically, usually after a short delay.
 
-## Project structure
+## Project files
 
 ```text
-app.py                  # Local Streamlit prototype
-scripts/prepare_data.py # Builds the compact static-site dataset
-docs/index.html         # GitHub Pages application
-docs/data/sales.json    # Generated data used by the website
+scripts/prepare_data.py  # Cleans the CSV and creates weekly totals
+docs/index.html          # Dashboard layout, charts, and forecast logic
+docs/data/sales.json     # Weekly data loaded by the website
+app.py                   # Earlier local Streamlit prototype
 ```
