@@ -1,20 +1,20 @@
 # Retail Sales Explorer
 
-A responsive, browser based dashboard for exploring weekly retail sales and comparing a short term forecast with a simple baseline. The public site is a static GitHub Pages website; visitors do not need Python or an account to use it.
+A responsive dashboard for exploring retail sales and comparing short term forecasts with a simple baseline. The public site is a static GitHub Pages website; visitors do not need Python or an account to use it.
+
+The dashboard supports the Indian Amazon Sale Report and the original UCI Online Retail dataset. With the Indian CSV, it groups orders by readable product category and forecasts weekly revenue in Indian rupees or units sold. The forecast uses historical weekly data as a planning estimate, not a guarantee.
 
 ## Features
 
-- Explore weekly revenue or units for all products or one of the top 20 products.
-- View top products by revenue.
+- Explore weekly revenue or units for all categories/products or one of the top 20.
+- View the top categories/products by revenue.
 - Forecast between one and twelve weeks with Holt's linear exponential smoothing.
 - Compare MAE and RMSE on recent held out weeks against a last week repeated baseline.
 - Use the site on desktop, tablet, or mobile screens.
 
-Returns and cancelled transactions are excluded from the demand series. The forecast is a course project demonstration using about one year of data, so it should be treated as an estimate.
+## Prepare the data
 
-## Prepare the site data
-
-Download the UCI Online Retail Excel file from the [UCI dataset page](https://archive.ics.uci.edu/dataset/352/online%2Bretail) and place it at `data/Online Retail.xlsx`. Then run:
+For the India focused dashboard, download **Amazon Sale Report.csv** from [Kaggle's E-Commerce Sales Dataset](https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data) and place it at `data/Amazon Sale Report.csv`. It contains order dates, product categories, quantities, amounts, and Indian shipping locations. Then run:
 
 ```bash
 python3 -m venv .venv
@@ -23,7 +23,9 @@ pip install -r requirements.txt
 python scripts/prepare_data.py
 ```
 
-The script creates `docs/data/sales.json`, a compact weekly product summary used by the browser app. The original workbook and intermediate files are excluded from Git.
+The script creates `docs/data/sales.json`, a compact weekly summary used by the browser app. It excludes cancelled, returned, rejected, lost, or refunded orders. The raw CSV is not included in the repository; follow Kaggle's dataset terms when using or sharing it.
+
+If `data/Amazon Sale Report.csv` is not present, the script falls back to the original UCI Online Retail dataset. Download it from the [UCI dataset page](https://archive.ics.uci.edu/dataset/352/online%2Bretail) and save it as `data/Online Retail.xlsx`.
 
 ## Run locally
 

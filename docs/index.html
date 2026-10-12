@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore historical online retail sales and compare weekly demand forecasts.">
+  <meta name="description" content="Explore Indian online retail categories and forecast weekly revenue or units sold.">
   <meta name="theme-color" content="#f5f5ef">
   <title>Retail Sales Explorer</title>
   <style>
@@ -144,24 +144,24 @@
     <main>
       <section class="hero">
         <div>
-          <p class="eyebrow">Predictive analytics · UCI online retail</p>
+        <p class="eyebrow" id="market-eyebrow">Predictive analytics · retail sales</p>
           <h1>See what’s moving.<br>Plan what’s next.</h1>
-          <p>Explore a year of retail activity, compare product performance, and see how a simple forecast holds up against recent sales.</p>
+          <p id="hero-description">Explore retail activity, compare product performance, and see how a simple forecast holds up against recent sales.</p>
         </div>
-        <div class="hero-badge"><strong>Historical data</strong><br>Dec 2010 — Dec 2011</div>
+        <div class="hero-badge"><strong id="market-name">Historical sales</strong><br><span id="period-badge">Period will appear when data loads</span></div>
       </section>
 
       <section class="explanation" aria-labelledby="explanation-title">
         <h2 id="explanation-title">What this website does</h2>
-        <p>It summarizes past online retail orders so you can compare products and sales over time. Choose <strong>revenue</strong> or <strong>units sold</strong>, then the forecasting model estimates that same measure for each of the next <strong>1–12 weeks</strong>. The estimate uses historical weekly patterns; it is a planning aid, not a guarantee of future sales.</p>
+        <p id="what-it-does">It summarizes past online retail orders so you can compare products and sales over time. Choose revenue or units sold to see an estimate for each of the next 1–12 weeks. The forecast uses historical weekly patterns as a planning aid.</p>
       </section>
 
       <div id="loading" class="loading">Loading the prepared sales dataset…</div>
       <div id="app" hidden>
         <section class="stats" aria-label="Sales summary">
-          <article class="stat"><div class="stat-label">Revenue</div><div class="stat-value" id="revenue-stat">—</div><div class="stat-note">GBP · selected products</div></article>
+          <article class="stat"><div class="stat-label">Revenue</div><div class="stat-value" id="revenue-stat">—</div><div class="stat-note" id="revenue-note">Selected view</div></article>
           <article class="stat"><div class="stat-label">Units sold</div><div class="stat-value" id="units-stat">—</div><div class="stat-note">Positive quantity transactions</div></article>
-          <article class="stat"><div class="stat-label">Active products</div><div class="stat-value" id="product-stat">—</div><div class="stat-note">Within the selected view</div></article>
+          <article class="stat"><div class="stat-label" id="product-stat-label">Active products</div><div class="stat-value" id="product-stat">—</div><div class="stat-note">Within the selected view</div></article>
           <article class="stat"><div class="stat-label">Weeks covered</div><div class="stat-value" id="weeks-stat">—</div><div class="stat-note" id="period-stat">—</div></article>
         </section>
 
@@ -185,7 +185,7 @@
               </table>
               <details class="method">
                 <summary>How this forecast works</summary>
-                <p>Exponential smoothing updates its estimate using recent sales and a trend. The validation scores compare predictions with the last eight historical weeks. The baseline repeats the last training week for every forecast week. Lower MAE and RMSE mean smaller errors. Returns and cancelled transactions are excluded from the demand series.</p>
+                <p id="method-description">Exponential smoothing uses recent sales and a trend. Validation compares predictions with recent held-out weeks against a simple last-week baseline. Lower MAE and RMSE mean smaller errors.</p>
               </details>
             </section>
           </div>
@@ -194,12 +194,12 @@
             <section class="panel">
               <div class="panel-head"><div><h2>Explore the data</h2><p class="panel-subtitle">Adjust the view and forecast</p></div></div>
               <div class="control-group">
-                <label class="control-label" for="product-select">Product</label>
+                <label class="control-label" for="product-select" id="product-label">Product</label>
                 <select id="product-select" aria-label="Select product"></select>
               </div>
               <div class="control-group">
                 <label class="control-label" for="metric-select">Measure</label>
-                <select id="metric-select"><option value="Revenue">Revenue (GBP)</option><option value="Units">Units sold</option></select>
+                <select id="metric-select"><option value="Revenue">Revenue</option><option value="Units">Units sold</option></select>
               </div>
               <div class="control-group">
                 <label class="control-label" for="horizon"><span>Forecast horizon</span><span><b id="horizon-value">4</b> weeks</span></label>
@@ -210,7 +210,7 @@
             </section>
 
             <section class="panel">
-              <div class="panel-head"><div><h2>Top products</h2><p class="panel-subtitle">Ranked by total revenue</p></div></div>
+              <div class="panel-head"><div><h2 id="top-title">Top products</h2><p class="panel-subtitle" id="top-subtitle">Ranked by total revenue</p></div></div>
               <div id="top-products" class="product-list"></div>
             </section>
           </aside>
@@ -218,21 +218,19 @@
       </div>
     </main>
 
-    <footer><span>Course project · Predictive Analytics</span><span>Source: <a href="https://archive.ics.uci.edu/dataset/352/online%2Bretail" target="_blank" rel="noreferrer">UCI Machine Learning Repository</a></span></footer>
+    <footer><span>Course project · Predictive Analytics</span><span>Dataset: <a id="source-link" href="https://archive.ics.uci.edu/dataset/352/online%2Bretail" target="_blank" rel="noreferrer">UCI Online Retail</a></span></footer>
   </div>
 
   <script>
     const byId = (id) => document.getElementById(id);
     let dataset;
 
-    const money = (value) => {
-      const abs = Math.abs(value);
-      if (abs >= 1_000_000) return `£${(value / 1_000_000).toFixed(2)}m`;
-      if (abs >= 10_000) return `£${(value / 1_000).toFixed(1)}k`;
-      return `£${value.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`;
-    };
+    const money = (value) => new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: dataset?.currency || "GBP", notation: "compact", maximumFractionDigits: 1,
+    }).format(value);
     const number = (value) => Math.round(value).toLocaleString("en-GB");
-    const metricLabel = () => byId("metric-select").value === "Revenue" ? "Revenue (GBP)" : "Units sold";
+    const metricLabel = () => byId("metric-select").value === "Revenue"
+      ? `Revenue (${dataset?.currency || "GBP"})` : "Units sold";
     const metricFormat = (value) => byId("metric-select").value === "Revenue" ? money(value) : number(value);
     const weekDate = (iso) => new Date(`${iso}T00:00:00Z`);
     const dateLabel = (iso, options = { day: "numeric", month: "short" }) =>
@@ -364,9 +362,10 @@
       byId("history-title").textContent = `Weekly ${metricLabel().toLowerCase()}`;
       byId("horizon-value").textContent = horizon;
       byId("forecast-column-title").textContent = metricLabel();
+      const excluded = dataset.excludedTransactions || "Returns and cancelled transactions";
       byId("filter-summary").textContent = productId === "all"
-        ? "All products · returns and cancelled transactions excluded"
-        : `${dataset.products[Number(productId)]} · returns and cancellations excluded`;
+        ? `${dataset.currency === "INR" ? "All categories" : "All products"} · ${excluded.toLowerCase()}`
+        : `${dataset.products[Number(productId)]} · ${excluded.toLowerCase()}`;
 
       const futureWeeks = forecast.map((_, index) => {
         const date = weekDate(dataset.weeks.at(-1));
@@ -409,6 +408,30 @@
         const response = await fetch("./data/sales.json");
         if (!response.ok) throw new Error("Could not load the prepared sales data.");
         dataset = await response.json();
+        const market = dataset.market || "Online Retail (United Kingdom)";
+        const currency = dataset.currency || "GBP";
+        const productLabel = dataset.productLabel || "Product";
+        const sourceLink = byId("source-link");
+        sourceLink.href = dataset.sourceUrl || "https://archive.ics.uci.edu/dataset/352/online%2Bretail";
+        sourceLink.textContent = dataset.source || "UCI Online Retail";
+        byId("market-eyebrow").textContent = `Predictive analytics · ${market}`;
+        byId("market-name").textContent = market;
+        byId("period-badge").textContent = `${dateLabel(dataset.weeks[0], { month: "short", year: "numeric" })} — ${dateLabel(dataset.weeks.at(-1), { month: "short", year: "numeric" })}`;
+        byId("hero-description").textContent = dataset.currency === "INR"
+          ? "Explore Indian online retail categories, compare demand in rupees and units, and see a short-term forecast based on past orders."
+          : "Explore online retail products, compare demand over time, and see a short-term forecast based on past orders.";
+        byId("what-it-does").textContent = dataset.currency === "INR"
+          ? `This dashboard summarizes Amazon India orders by product category. Choose a category and forecast weekly revenue in ₹ (${currency}) or units sold for the next 1–12 weeks. The model learns from the available past weeks; it is a planning estimate, not a promise of future sales.`
+          : `This dashboard summarizes ${market} orders by product. Choose a product and forecast weekly revenue (${currency}) or units sold for the next 1–12 weeks. The model learns from the available past weeks; it is a planning estimate, not a promise of future sales.`;
+        byId("product-label").textContent = productLabel;
+        byId("product-stat-label").textContent = dataset.currency === "INR" ? "Categories in view" : "Active products";
+        byId("metric-select").querySelector('option[value="Revenue"]').textContent = `Revenue (${currency})`;
+        byId("top-title").textContent = dataset.currency === "INR" ? "Top categories" : "Top products";
+        byId("revenue-note").textContent = `${currency} · selected view`;
+        if (dataset.currency === "INR") {
+          byId("method-description").textContent = "Holt's exponential smoothing uses recent weekly sales and trend. MAE and RMSE compare its predictions on the final four observed weeks, held out from training, with a simple last-week baseline. The source covers only about three months, so treat longer forecasts as a classroom demonstration. Cancelled, returned, rejected, lost, or refunded orders are excluded.";
+        }
+        if (dataset.excludedTransactions) byId("filter-summary").textContent = `Excluded: ${dataset.excludedTransactions.toLowerCase()}.`;
 
         const totals = new Map();
         for (const [, productId, revenue] of dataset.rows) {
@@ -418,7 +441,7 @@
         const select = byId("product-select");
         const all = document.createElement("option");
         all.value = "all";
-        all.textContent = "All products";
+        all.textContent = dataset.currency === "INR" ? "All categories" : "All products";
         select.append(all);
         for (const [productId] of topIds) {
           const option = document.createElement("option");
