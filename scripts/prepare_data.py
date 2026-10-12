@@ -36,8 +36,17 @@ def build_india_weekly_data() -> tuple[pd.DataFrame, dict]:
     if "currency" in sales:
         sales = sales[sales["currency"].isna() | sales["currency"].astype("string").str.upper().isin(["INR", "₹"])]
 
-    sales["Revenue"] = sales["Amount"].fillna(0).clip(lower=0)
+    # Do not let a few days at either edge masquerade as a full week. Uneven
+    # boundary weeks can distort both the displayed history and the forecast.
     sales["WeekStart"] = sales["Date"].dt.to_period("W-SUN").dt.start_time
+    first_week = sales["WeekStart"].min()
+    last_week = sales["WeekStart"].max()
+    if sales["Date"].min().normalize() > first_week:
+        sales = sales[sales["WeekStart"] != first_week]
+    if sales["Date"].max().normalize() < last_week + pd.Timedelta(days=6):
+        sales = sales[sales["WeekStart"] != last_week]
+
+    sales["Revenue"] = sales["Amount"].fillna(0).clip(lower=0)
     weekly = (
         sales.groupby(["WeekStart", "Category"], as_index=False)
         .agg(Revenue=("Revenue", "sum"), Units=("Qty", "sum"))

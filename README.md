@@ -2,14 +2,13 @@
 
 A responsive dashboard for exploring retail sales and comparing short term forecasts with a simple baseline. The public site is a static GitHub Pages website; visitors do not need Python or an account to use it.
 
-The dashboard supports the Indian Amazon Sale Report and the original UCI Online Retail dataset. With the Indian CSV, it groups orders by readable product category and forecasts weekly revenue in Indian rupees or units sold. The forecast uses historical weekly data as a planning estimate, not a guarantee.
+The dashboard is tailored to the Indian Amazon Sale Report. It groups orders by readable clothing category and forecasts weekly revenue in Indian rupees or units sold. Visitors choose a category, what they want to forecast, and how many weeks ahead. The page then shows the estimated total, next week's estimate, recent direction, and a chart. The forecast is a planning estimate, not a guarantee.
 
 ## Features
 
-- Explore weekly revenue or units for all categories/products or one of the top 20.
-- View the top categories/products by revenue.
-- Forecast between one and twelve weeks with Holt's linear exponential smoothing.
-- Compare MAE and RMSE on recent held out weeks against a last week repeated baseline.
+- Explore weekly revenue or units for all categories or one chosen category.
+- Forecast between one and twelve weeks with damped-trend Holt exponential smoothing, which softens the recent trend further into the future.
+- Compare MAE and RMSE on recent held-out weeks against a last-week-repeated baseline.
 - Use the site on desktop, tablet, or mobile screens.
 
 ## Prepare the data
@@ -23,7 +22,7 @@ pip install -r requirements.txt
 python scripts/prepare_data.py
 ```
 
-The script creates `docs/data/sales.json`, a compact weekly summary used by the browser app. It excludes cancelled, returned, rejected, lost, or refunded orders. The raw CSV is not included in the repository; follow Kaggle's dataset terms when using or sharing it.
+The script creates `docs/data/sales.json`, a compact weekly summary used by the browser app. It excludes cancelled, returned, rejected, lost, or refunded orders and incomplete first or last weeks. The raw CSV is not included in the repository; follow Kaggle's dataset terms when using or sharing it.
 
 If `data/Amazon Sale Report.csv` is not present, the script falls back to the original UCI Online Retail dataset. Download it from the [UCI dataset page](https://archive.ics.uci.edu/dataset/352/online%2Bretail) and save it as `data/Online Retail.xlsx`.
 

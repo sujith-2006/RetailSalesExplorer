@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore Indian online retail categories and forecast weekly revenue or units sold.">
+  <meta name="description" content="A simple view of Amazon India sales and category forecasts.">
   <meta name="theme-color" content="#f5f5ef">
   <title>Retail Sales Explorer</title>
   <style>
@@ -18,114 +18,99 @@
       --mint: #dff2e8;
       --lime: #d4ed72;
       --orange: #d88752;
-      --shadow: 0 18px 50px rgba(23, 36, 31, .06);
+      --shadow: 0 14px 38px rgba(23, 36, 31, .055);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
-      background:
-        radial-gradient(ellipse at 82% 0%, rgba(212, 237, 114, .15), transparent 36rem),
-        var(--paper);
+      background: radial-gradient(ellipse at 82% 0%, rgba(212, 237, 114, .15), transparent 36rem), var(--paper);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.5;
     }
     button, select, input { font: inherit; }
-    .page { width: min(1320px, calc(100% - 48px)); margin: 0 auto; }
-    header {
-      height: 82px; display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid rgba(23, 36, 31, .09);
-    }
-    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.03em; }
-    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--green); }
-    .brand-mark svg { width: 19px; height: 19px; }
-    .header-meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .page { width: min(1100px, calc(100% - 40px)); margin: 0 auto; }
+    header { height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(23, 36, 31, .09); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 750; letter-spacing: -.03em; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; color: white; background: var(--green); }
+    .brand-mark svg { width: 18px; height: 18px; }
+    .header-meta { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #54a97e; box-shadow: 0 0 0 4px #e1f2e8; }
-    .hero { padding: 58px 0 36px; display: flex; align-items: end; justify-content: space-between; gap: 28px; }
-    .eyebrow { margin: 0 0 13px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-    h1 { max-width: 760px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(42px, 6vw, 70px); font-weight: 500; letter-spacing: -.055em; line-height: .99; }
-    .hero p { max-width: 650px; margin: 18px 0 0; color: var(--muted); font-size: 16px; }
-    .hero-badge { flex: 0 0 auto; padding: 12px 15px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: rgba(255, 254, 250, .7); font-size: 12px; }
-    .hero-badge strong { color: var(--ink); }
-    .explanation { margin: 0 0 18px; padding: 20px 23px; border: 1px solid #d9e8dc; border-radius: 18px; background: linear-gradient(110deg, #eaf5ec, #fffefa 75%); }
-    .explanation h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
-    .explanation p { max-width: 980px; margin: 7px 0 0; color: #53645a; font-size: 13px; }
-    .explanation strong { color: var(--green-dark); }
-    .loading { padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); color: var(--muted); }
+    .hero { padding: 44px 0 24px; }
+    .eyebrow { margin: 0 0 9px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 6vw, 58px); font-weight: 500; letter-spacing: -.05em; line-height: 1.02; }
+    .hero p { max-width: 650px; margin: 13px 0 0; color: var(--muted); font-size: 15px; }
+    .period { margin-top: 14px; color: #87928b; font-size: 11px; }
+    .loading, .panel { border: 1px solid var(--line); border-radius: 18px; background: var(--card); box-shadow: var(--shadow); }
+    .loading { padding: 22px; color: var(--muted); }
     .error { color: #9d422e; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
-    .stat, .panel { border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: var(--shadow); }
-    .stat { min-height: 126px; padding: 21px 23px; }
-    .stat-label { color: var(--muted); font-size: 12px; font-weight: 650; }
-    .stat-value { margin-top: 10px; font-size: clamp(22px, 2.8vw, 32px); font-weight: 750; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
-    .stat-note { margin-top: 2px; color: #8a958e; font-size: 11px; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(290px, .85fr); gap: 18px; align-items: start; }
-    .main-column, .side-column { display: grid; gap: 18px; }
-    .panel { padding: 25px; }
-    .panel-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
-    .panel h2 { margin: 0; font-size: 19px; letter-spacing: -.035em; }
-    .panel-subtitle { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
-    .chart-legend { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 11px; white-space: nowrap; }
-    .legend-item { display: inline-flex; align-items: center; gap: 7px; }
-    .legend-line { width: 18px; height: 2px; background: var(--green); }
-    .legend-line.dashed { background: repeating-linear-gradient(90deg, var(--orange) 0 5px, transparent 5px 8px); }
-    .chart-wrap { margin-top: 20px; min-height: 285px; }
+    .panel { padding: 22px; }
+    .controls { display: grid; grid-template-columns: minmax(220px, 1.15fr) minmax(250px, 1fr) minmax(210px, .9fr); align-items: end; gap: 18px; margin-bottom: 18px; }
+    .field-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .04em; }
+    select { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 11px; outline: none; color: var(--ink); background: #fff; }
+    select:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid rgba(30, 100, 76, .22); outline-offset: 2px; }
+    .metric-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: #f3f5ef; }
+    .metric-switch button { min-height: 34px; padding: 6px 9px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .metric-switch button[aria-pressed="true"] { color: white; background: var(--green); box-shadow: 0 2px 8px rgba(22, 73, 54, .15); }
+    .horizon-heading { display: flex; justify-content: space-between; gap: 10px; }
+    .horizon-value { color: var(--green-dark); font-weight: 750; }
+    input[type="range"] { display: block; width: 100%; margin: 11px 0 0; accent-color: var(--green); }
+    .range-labels { display: flex; justify-content: space-between; margin-top: 1px; color: #87928b; font-size: 10px; }
+    .result-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, .42fr); gap: 22px; align-items: center; margin-bottom: 18px; padding: 24px 26px; border: 1px solid #d9e8dc; border-radius: 19px; background: linear-gradient(110deg, #eaf5ec, #fffefa 78%); }
+    .result-kicker { margin: 0; color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .result-card h2 { margin: 5px 0 0; font-size: 18px; letter-spacing: -.03em; }
+    .result-value { margin-top: 6px; font-size: clamp(30px, 4vw, 42px); font-weight: 780; letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+    .result-value-label { color: var(--muted); font-size: 11px; }
+    .insight { max-width: 650px; margin: 13px 0 0; color: #53645a; font-size: 13px; }
+    .next-result { padding-left: 20px; border-left: 1px solid #d7e2d7; }
+    .next-result-label { color: var(--muted); font-size: 11px; font-weight: 650; }
+    .next-result-value { margin-top: 4px; color: var(--ink); font-size: 24px; font-weight: 750; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .direction { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 5px 9px; border-radius: 99px; color: var(--green-dark); background: var(--mint); font-size: 11px; font-weight: 700; }
+    .direction.down { color: #92522e; background: #f8eadf; }
+    .direction.steady { color: #59645d; background: #edf0e9; }
+    .chart-panel { padding: 21px 22px 16px; }
+    .panel-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .panel-heading h2 { margin: 0; font-size: 16px; letter-spacing: -.025em; }
+    .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .legend { display: flex; align-items: center; gap: 13px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 15px; height: 2px; display: inline-block; background: var(--green); }
+    .legend i.forecast { background: repeating-linear-gradient(90deg, var(--orange) 0 4px, transparent 4px 7px); }
+    .chart-wrap { margin-top: 13px; }
     .chart-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
     .axis-label { fill: #87928b; font-size: 11px; font-family: inherit; }
     .grid-line { stroke: #edf0e9; stroke-width: 1; }
     .actual-line { fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
     .forecast-line { fill: none; stroke: var(--orange); stroke-width: 3; stroke-dasharray: 7 6; stroke-linecap: round; stroke-linejoin: round; }
     .forecast-dot { fill: var(--orange); stroke: var(--card); stroke-width: 3; }
-    .chart-empty { min-height: 250px; display: grid; place-items: center; color: var(--muted); }
-    .control-group { margin-top: 23px; }
-    .control-group:first-of-type { margin-top: 20px; }
-    .control-label { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
-    select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; outline: none; color: var(--ink); background: #fff; }
-    select:focus, input:focus-visible { outline: 3px solid rgba(30, 100, 76, .18); border-color: var(--green); }
-    input[type="range"] { width: 100%; accent-color: var(--green); }
-    .range-meta { display: flex; justify-content: space-between; color: #87928b; font-size: 10px; }
-    .filter-summary { margin-top: 19px; padding: 13px 14px; border-radius: 12px; color: var(--green-dark); background: var(--mint); font-size: 11px; }
-    .product-list { margin-top: 19px; display: grid; gap: 15px; }
-    .product-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
-    .product-name { overflow: hidden; color: #435148; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-    .product-value { color: var(--ink); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .bar-track { grid-column: 1 / -1; height: 5px; overflow: hidden; border-radius: 5px; background: #edf0e9; }
-    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #347d5c, #a9d07b); }
-    .forecast-score { margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .score-card { padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: #fbfcf8; }
-    .score-title { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .score-number { margin-top: 4px; font-size: 19px; font-weight: 760; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-    .score-unit { color: var(--muted); font-size: 10px; }
-    .comparison { margin-top: 13px; padding: 13px 14px; border-radius: 13px; background: #f1f4ec; }
-    .comparison strong { display: block; font-size: 12px; }
-    .comparison span { color: var(--muted); font-size: 11px; }
-    .comparison.winner { background: var(--mint); }
-    .forecast-table { width: 100%; margin-top: 18px; border-collapse: collapse; font-size: 12px; }
-    .forecast-table th, .forecast-table td { padding: 11px 8px; border-bottom: 1px solid var(--line); text-align: left; }
-    .forecast-table th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
-    .forecast-table td:last-child, .forecast-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
-    .method { margin: 18px 0 0; padding: 0; border-top: 1px solid var(--line); }
-    .method summary { padding-top: 15px; color: var(--green); cursor: pointer; font-size: 12px; font-weight: 700; }
-    .method p { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
-    footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 38px; color: #87928b; font-size: 11px; }
-    footer a { color: var(--green); text-decoration: none; }
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .stats { grid-template-columns: repeat(2, 1fr); }
+    .validation { margin-top: 14px; border-top: 1px solid var(--line); }
+    .validation summary { padding-top: 13px; color: var(--green); cursor: pointer; font-size: 11px; font-weight: 700; }
+    .validation p { margin: 9px 0 0; color: var(--muted); font-size: 11px; }
+    .scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 12px; }
+    .score { padding: 10px; border: 1px solid var(--line); border-radius: 11px; background: #fbfcf8; }
+    .score span { display: block; color: var(--muted); font-size: 9px; }
+    .score strong { display: block; margin-top: 3px; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .source-note { display: flex; justify-content: space-between; gap: 15px; padding: 20px 0 30px; color: #87928b; font-size: 10px; }
+    .source-note a { color: var(--green); text-decoration: none; }
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls .horizon-control { grid-column: 1 / -1; }
+      .result-card { grid-template-columns: 1fr; gap: 16px; }
+      .next-result { padding: 14px 0 0; border-left: 0; border-top: 1px solid #d7e2d7; }
     }
-    @media (max-width: 600px) {
-      .page { width: min(100% - 28px, 1320px); }
-      header { height: 68px; }
-      .hero { padding: 40px 0 25px; display: block; }
-      .hero-badge { display: inline-block; margin-top: 20px; }
-      .stats { gap: 9px; }
-      .stat { min-height: 105px; padding: 15px; border-radius: 15px; }
-      .stat-value { font-size: 23px; }
-      .panel { padding: 19px; border-radius: 16px; }
-      .side-column { grid-template-columns: 1fr; }
-      .chart-legend { flex-direction: column; align-items: flex-start; gap: 5px; }
-      footer { display: block; line-height: 1.8; }
+    @media (max-width: 520px) {
+      .page { width: min(100% - 26px, 1100px); }
+      header { height: 62px; }
+      .hero { padding: 34px 0 19px; }
+      .hero p { font-size: 13px; }
+      .panel { padding: 16px; border-radius: 15px; }
+      .controls { grid-template-columns: 1fr; gap: 14px; }
+      .controls .horizon-control { grid-column: auto; }
+      .result-card { padding: 19px; gap: 14px; }
+      .panel-heading { display: block; }
+      .legend { margin-top: 10px; }
+      .scores { grid-template-columns: 1fr 1fr; }
+      .source-note { display: block; line-height: 1.8; }
     }
   </style>
 </head>
@@ -138,116 +123,98 @@
         </span>
         <span>Retail Signals</span>
       </div>
-      <div class="header-meta"><span class="status-dot"></span><span id="status">Preparing sales data</span></div>
+      <div class="header-meta"><span class="status-dot"></span><span id="status">Loading sales</span></div>
     </header>
 
     <main>
       <section class="hero">
-        <div>
-        <p class="eyebrow" id="market-eyebrow">Predictive analytics · retail sales</p>
-          <h1>See what’s moving.<br>Plan what’s next.</h1>
-          <p id="hero-description">Explore retail activity, compare product performance, and see how a simple forecast holds up against recent sales.</p>
-        </div>
-        <div class="hero-badge"><strong id="market-name">Historical sales</strong><br><span id="period-badge">Period will appear when data loads</span></div>
+        <p class="eyebrow" id="eyebrow">Amazon India · weekly sales</p>
+        <h1>Know what might sell next.</h1>
+        <p>Choose a category and measure. Get a clear forecast and a short explanation of what it means.</p>
+        <div class="period" id="period">Loading the sales period…</div>
       </section>
 
-      <section class="explanation" aria-labelledby="explanation-title">
-        <h2 id="explanation-title">What this website does</h2>
-        <p id="what-it-does">It summarizes past online retail orders so you can compare products and sales over time. Choose revenue or units sold to see an estimate for each of the next 1–12 weeks. The forecast uses historical weekly patterns as a planning aid.</p>
-      </section>
-
-      <div id="loading" class="loading">Loading the prepared sales dataset…</div>
+      <div id="loading" class="loading">Preparing your sales dashboard…</div>
       <div id="app" hidden>
-        <section class="stats" aria-label="Sales summary">
-          <article class="stat"><div class="stat-label">Revenue</div><div class="stat-value" id="revenue-stat">—</div><div class="stat-note" id="revenue-note">Selected view</div></article>
-          <article class="stat"><div class="stat-label">Units sold</div><div class="stat-value" id="units-stat">—</div><div class="stat-note">Positive quantity transactions</div></article>
-          <article class="stat"><div class="stat-label" id="product-stat-label">Active products</div><div class="stat-value" id="product-stat">—</div><div class="stat-note">Within the selected view</div></article>
-          <article class="stat"><div class="stat-label">Weeks covered</div><div class="stat-value" id="weeks-stat">—</div><div class="stat-note" id="period-stat">—</div></article>
+        <section class="panel controls" aria-label="Forecast settings">
+          <div>
+            <label class="field-label" for="category-select">1. Product category</label>
+            <select id="category-select" aria-label="Choose a product category"></select>
+          </div>
+          <div>
+            <span class="field-label" id="measure-label">2. What do you want to predict?</span>
+            <div class="metric-switch" role="group" aria-labelledby="measure-label">
+              <button type="button" data-metric="Revenue" aria-pressed="true">Revenue (₹)</button>
+              <button type="button" data-metric="Units" aria-pressed="false">Units sold</button>
+            </div>
+          </div>
+          <div class="horizon-control">
+            <label class="field-label horizon-heading" for="horizon"><span>3. How far ahead?</span><span class="horizon-value"><b id="horizon-value">4</b> weeks</span></label>
+            <input id="horizon" type="range" min="1" max="12" value="4" aria-label="Forecast weeks ahead">
+            <div class="range-labels"><span>1 week</span><span>12 weeks</span></div>
+          </div>
         </section>
 
-        <div class="layout">
-          <div class="main-column">
-            <section class="panel">
-              <div class="panel-head">
-                <div><h2 id="history-title">Weekly revenue</h2><p class="panel-subtitle">Actual sales and the selected forecast horizon</p></div>
-                <div class="chart-legend"><span class="legend-item"><i class="legend-line"></i>Historical</span><span class="legend-item"><i class="legend-line dashed"></i>Forecast</span></div>
-              </div>
-              <div id="sales-chart" class="chart-wrap" role="img" aria-label="Weekly sales chart"></div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-head"><div><h2>Forecast check</h2><p class="panel-subtitle" id="validation-caption">Predictions for recent weeks held out of training</p></div></div>
-              <div class="forecast-score" id="scores"></div>
-              <div class="comparison" id="comparison"></div>
-              <table class="forecast-table">
-                <thead><tr><th>Forecast week</th><th id="forecast-column-title">Revenue (GBP)</th></tr></thead>
-                <tbody id="forecast-rows"></tbody>
-              </table>
-              <details class="method">
-                <summary>How this forecast works</summary>
-                <p id="method-description">Exponential smoothing uses recent sales and a trend. Validation compares predictions with recent held-out weeks against a simple last-week baseline. Lower MAE and RMSE mean smaller errors.</p>
-              </details>
-            </section>
+        <section class="result-card" aria-live="polite" aria-atomic="true">
+          <div>
+            <p class="result-kicker">Your forecast</p>
+            <h2 id="result-heading">Expected total over the next 4 weeks</h2>
+            <div class="result-value" id="total-forecast">—</div>
+            <div class="result-value-label" id="total-label">Estimated from recent sales</div>
+            <p class="insight" id="insight">Choose a category to see what the forecast suggests.</p>
           </div>
+          <div class="next-result">
+            <div class="next-result-label" id="next-label">Next week's estimate</div>
+            <div class="next-result-value" id="next-forecast">—</div>
+            <span class="direction steady" id="direction">Trend will appear here</span>
+          </div>
+        </section>
 
-          <aside class="side-column">
-            <section class="panel">
-              <div class="panel-head"><div><h2>Explore the data</h2><p class="panel-subtitle">Adjust the view and forecast</p></div></div>
-              <div class="control-group">
-                <label class="control-label" for="product-select" id="product-label">Product</label>
-                <select id="product-select" aria-label="Select product"></select>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="metric-select">Measure</label>
-                <select id="metric-select"><option value="Revenue">Revenue</option><option value="Units">Units sold</option></select>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="horizon"><span>Forecast horizon</span><span><b id="horizon-value">4</b> weeks</span></label>
-                <input id="horizon" type="range" min="1" max="12" value="4">
-                <div class="range-meta"><span>1 week</span><span>12 weeks</span></div>
-              </div>
-              <div class="filter-summary" id="filter-summary">Returns and cancelled transactions are excluded.</div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-head"><div><h2 id="top-title">Top products</h2><p class="panel-subtitle" id="top-subtitle">Ranked by total revenue</p></div></div>
-              <div id="top-products" class="product-list"></div>
-            </section>
-          </aside>
-        </div>
+        <section class="panel chart-panel">
+          <div class="panel-heading">
+            <div><h2 id="chart-title">Sales history and forecast</h2><p id="chart-subtitle">Weekly actuals followed by the forecast</p></div>
+            <div class="legend" aria-label="Chart legend"><span><i></i>Actual</span><span><i class="forecast"></i>Forecast</span></div>
+          </div>
+          <div id="sales-chart" class="chart-wrap" role="img" aria-label="Weekly sales history and forecast chart"></div>
+          <details class="validation">
+            <summary>How reliable was the model on recent weeks?</summary>
+            <p id="validation-description">A damped-trend Holt model carries the recent direction forward but gradually softens it over longer horizons. The final observed weeks are held back and compared with a baseline that repeats the last training week. Lower MAE and RMSE mean smaller errors.</p>
+            <div id="scores" class="scores"></div>
+          </details>
+        </section>
       </div>
     </main>
 
-    <footer><span>Course project · Predictive Analytics</span><span>Dataset: <a id="source-link" href="https://archive.ics.uci.edu/dataset/352/online%2Bretail" target="_blank" rel="noreferrer">UCI Online Retail</a></span></footer>
+    <footer class="source-note"><span>Course project · Predictive Analytics</span><span>Data source: <a id="source-link" href="#" target="_blank" rel="noreferrer">Amazon Sale Report (Kaggle)</a></span></footer>
   </div>
 
   <script>
     const byId = (id) => document.getElementById(id);
     let dataset;
+    let selectedMetric = "Revenue";
 
     const money = (value) => new Intl.NumberFormat("en-IN", {
-      style: "currency", currency: dataset?.currency || "GBP", notation: "compact", maximumFractionDigits: 1,
+      style: "currency", currency: dataset.currency || "INR", notation: "compact", maximumFractionDigits: 1,
     }).format(value);
-    const number = (value) => Math.round(value).toLocaleString("en-GB");
-    const metricLabel = () => byId("metric-select").value === "Revenue"
-      ? `Revenue (${dataset?.currency || "GBP"})` : "Units sold";
-    const metricFormat = (value) => byId("metric-select").value === "Revenue" ? money(value) : number(value);
+    const quantity = (value) => Math.round(value).toLocaleString("en-IN");
+    const valueLabel = (value) => selectedMetric === "Revenue" ? money(value) : `${quantity(value)} units`;
+    const metricName = () => selectedMetric === "Revenue" ? "revenue" : "units sold";
     const weekDate = (iso) => new Date(`${iso}T00:00:00Z`);
     const dateLabel = (iso, options = { day: "numeric", month: "short" }) =>
-      weekDate(iso).toLocaleDateString("en-GB", { ...options, timeZone: "UTC" });
+      weekDate(iso).toLocaleDateString("en-IN", { ...options, timeZone: "UTC" });
 
-    function makeSeries(productId, metric) {
+    function makeSeries(categoryId) {
       const values = new Array(dataset.weeks.length).fill(0);
-      for (const [weekId, rowProductId, revenue, units] of dataset.rows) {
-        if (productId === "all" || Number(productId) === rowProductId) {
-          values[weekId] += metric === "Revenue" ? revenue : units;
+      for (const [weekId, rowCategoryId, revenue, units] of dataset.rows) {
+        if (categoryId === "all" || Number(categoryId) === rowCategoryId) {
+          values[weekId] += selectedMetric === "Revenue" ? revenue : units;
         }
       }
       return values;
     }
 
     function holtForecast(values, horizon) {
-      // A small grid search chooses alpha and beta by one-step training error.
+      const damping = 0.8;
       let best = { error: Infinity, level: values[0], trend: 0 };
       for (let alphaStep = 1; alphaStep <= 19; alphaStep++) {
         const alpha = alphaStep / 20;
@@ -257,16 +224,19 @@
           let trend = values[1] - values[0];
           let error = 0;
           for (let i = 1; i < values.length; i++) {
-            const prediction = level + trend;
-            error += (values[i] - prediction) ** 2;
-            const nextLevel = alpha * values[i] + (1 - alpha) * (level + trend);
-            trend = beta * (nextLevel - level) + (1 - beta) * trend;
+            error += (values[i] - (level + damping * trend)) ** 2;
+            const nextLevel = alpha * values[i] + (1 - alpha) * (level + damping * trend);
+            trend = beta * (nextLevel - level) + (1 - beta) * damping * trend;
             level = nextLevel;
           }
           if (error < best.error) best = { error, level, trend };
         }
       }
-      return Array.from({ length: horizon }, (_, i) => Math.max(0, best.level + (i + 1) * best.trend));
+      let dampedTrend = 0;
+      return Array.from({ length: horizon }, () => {
+        dampedTrend = damping * (dampedTrend + best.trend);
+        return Math.max(0, best.level + dampedTrend);
+      });
     }
 
     function score(actual, predicted) {
@@ -278,8 +248,8 @@
     }
 
     function createSvgChart(actual, predicted, weeks) {
-      const width = 900, height = 320;
-      const left = 68, right = 18, top = 14, bottom = 39;
+      const width = 900, height = 300;
+      const left = 78, right = 15, top = 12, bottom = 36;
       const innerWidth = width - left - right, innerHeight = height - top - bottom;
       const all = [...actual, ...predicted];
       const maxValue = Math.max(...all, 1) * 1.12;
@@ -290,117 +260,67 @@
       for (let i = 0; i <= 4; i++) {
         const value = maxValue * (1 - i / 4);
         const gy = y(value);
-        const label = byId("metric-select").value === "Revenue" ? money(value) : number(value);
-        grid += `<line class="grid-line" x1="${left}" y1="${gy}" x2="${width - right}" y2="${gy}"/><text class="axis-label" x="${left - 10}" y="${gy + 4}" text-anchor="end">${label}</text>`;
+        const label = selectedMetric === "Revenue" ? money(value) : quantity(value);
+        grid += `<line class="grid-line" x1="${left}" y1="${gy}" x2="${width - right}" y2="${gy}"/><text class="axis-label" x="${left - 9}" y="${gy + 4}" text-anchor="end">${label}</text>`;
       }
       const labelIndices = [...new Set([0, Math.floor((weeks.length - 1) / 2), weeks.length - 1])];
       let xLabels = "";
       for (const i of labelIndices) {
         const anchor = i === 0 ? "start" : i === weeks.length - 1 ? "end" : "middle";
-        xLabels += `<text class="axis-label" x="${x(i)}" y="${height - 10}" text-anchor="${anchor}">${dateLabel(weeks[i], { month: "short", year: "2-digit" })}</text>`;
+        xLabels += `<text class="axis-label" x="${x(i)}" y="${height - 9}" text-anchor="${anchor}">${dateLabel(weeks[i], { month: "short", year: "2-digit" })}</text>`;
       }
-      const forecastPath = `${pathFor([actual[actual.length - 1], ...predicted], actual.length - 1)}`;
+      const forecastPath = pathFor([actual.at(-1), ...predicted], actual.length - 1);
       const dots = predicted.map((value, index) => `<circle class="forecast-dot" cx="${x(actual.length + index)}" cy="${y(value)}" r="4.5"/>`).join("");
       return `<svg viewBox="0 0 ${width} ${height}" aria-hidden="true">${grid}<path class="actual-line" d="${pathFor(actual)}"/><path class="forecast-line" d="${forecastPath}"/>${dots}${xLabels}</svg>`;
     }
 
-    function renderTopProducts() {
-      const totals = new Map();
-      for (const [, productId, revenue] of dataset.rows) {
-        totals.set(productId, (totals.get(productId) || 0) + revenue);
-      }
-      const ranked = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
-      const max = ranked[0]?.[1] || 1;
-      const root = byId("top-products");
-      root.replaceChildren();
-      for (const [productId, revenue] of ranked) {
-        const row = document.createElement("div");
-        row.className = "product-row";
-        const name = document.createElement("span");
-        name.className = "product-name";
-        name.textContent = dataset.products[productId];
-        name.title = dataset.products[productId];
-        const value = document.createElement("span");
-        value.className = "product-value";
-        value.textContent = money(revenue);
-        const track = document.createElement("div");
-        track.className = "bar-track";
-        const fill = document.createElement("div");
-        fill.className = "bar-fill";
-        fill.style.width = `${(revenue / max) * 100}%`;
-        track.append(fill);
-        row.append(name, value, track);
-        root.append(row);
-      }
-    }
-
     function render() {
-      const productId = byId("product-select").value;
-      const metric = byId("metric-select").value;
+      const categoryId = byId("category-select").value;
       const horizon = Number(byId("horizon").value);
-      const selectedRows = productId === "all"
-        ? dataset.rows
-        : dataset.rows.filter((row) => row[1] === Number(productId));
-      const revenue = selectedRows.reduce((sum, row) => sum + row[2], 0);
-      const units = selectedRows.reduce((sum, row) => sum + row[3], 0);
-      const activeProducts = new Set(selectedRows.map((row) => row[1])).size;
-      const values = makeSeries(productId, metric);
+      const values = makeSeries(categoryId);
       const holdoutLength = Math.min(8, Math.max(4, Math.floor(values.length / 5)));
       const train = values.slice(0, -holdoutLength);
       const actual = values.slice(-holdoutLength);
       const modelValidation = holtForecast(train, holdoutLength);
-      const baselineValidation = new Array(holdoutLength).fill(train[train.length - 1]);
+      const baselineValidation = new Array(holdoutLength).fill(train.at(-1));
       const modelScore = score(actual, modelValidation);
       const baselineScore = score(actual, baselineValidation);
       const forecast = holtForecast(values, horizon);
+      const category = categoryId === "all" ? "all categories" : dataset.products[Number(categoryId)];
+      const totalForecast = forecast.reduce((sum, value) => sum + value, 0);
+      const nextForecast = forecast[0];
+      const recentAverage = values.slice(-4).reduce((sum, value) => sum + value, 0) / Math.min(4, values.length);
+      const forecastAverage = totalForecast / forecast.length;
+      const changePercent = recentAverage > 0 ? ((forecastAverage / recentAverage) - 1) * 100 : null;
+      const direction = changePercent === null || Math.abs(changePercent) < 5
+        ? "steady" : changePercent > 0 ? "up" : "down";
+      const directionText = direction === "up" ? "↑ Rising" : direction === "down" ? "↓ Easing" : "→ Fairly steady";
 
-      byId("revenue-stat").textContent = money(revenue);
-      byId("units-stat").textContent = number(units);
-      byId("product-stat").textContent = number(activeProducts);
-      byId("weeks-stat").textContent = number(values.length);
-      byId("period-stat").textContent = `${dateLabel(dataset.weeks[0])} — ${dateLabel(dataset.weeks.at(-1))}`;
-      byId("history-title").textContent = `Weekly ${metricLabel().toLowerCase()}`;
       byId("horizon-value").textContent = horizon;
-      byId("forecast-column-title").textContent = metricLabel();
-      const excluded = dataset.excludedTransactions || "Returns and cancelled transactions";
-      byId("filter-summary").textContent = productId === "all"
-        ? `${dataset.currency === "INR" ? "All categories" : "All products"} · ${excluded.toLowerCase()}`
-        : `${dataset.products[Number(productId)]} · ${excluded.toLowerCase()}`;
-
+      byId("result-heading").textContent = `Expected total over the next ${horizon} ${horizon === 1 ? "week" : "weeks"}`;
+      byId("total-forecast").textContent = valueLabel(totalForecast);
+      byId("total-label").textContent = `Projected ${metricName()} across ${horizon} ${horizon === 1 ? "week" : "weeks"}`;
+      byId("next-label").textContent = `Next week’s ${metricName()}`;
+      byId("next-forecast").textContent = valueLabel(nextForecast);
+      byId("direction").className = `direction ${direction === "up" ? "" : direction}`;
+      byId("direction").textContent = directionText;
+      byId("insight").textContent = changePercent === null
+        ? `${category}: there were no recorded sales in the last four weeks, so the recent trend cannot be compared reliably.`
+        : `${category}: the forecast averages ${Math.abs(changePercent).toFixed(1)}% ${changePercent >= 0 ? "above" : "below"} the last four weeks’ average weekly ${metricName()}. Treat it as a short-term planning estimate.`;
+      byId("chart-title").textContent = `Weekly ${metricName()}`;
+      byId("chart-subtitle").textContent = `${category} · actuals through ${dateLabel(dataset.weeks.at(-1))}, followed by the forecast`;
       const futureWeeks = forecast.map((_, index) => {
         const date = weekDate(dataset.weeks.at(-1));
         date.setUTCDate(date.getUTCDate() + 7 * (index + 1));
         return date.toISOString().slice(0, 10);
       });
-      const chartWeeks = [...dataset.weeks, ...futureWeeks];
-      byId("sales-chart").innerHTML = createSvgChart(values, forecast, chartWeeks);
-
+      byId("sales-chart").innerHTML = createSvgChart(values, forecast, [...dataset.weeks, ...futureWeeks]);
+      byId("sales-chart").setAttribute("aria-label", `Weekly ${metricName()} history and ${horizon}-week forecast for ${category}`);
       byId("scores").innerHTML = `
-        <div><div class="score-title">Exponential · MAE</div><div class="score-card"><div class="score-number">${metricFormat(modelScore.mae)}</div><span class="score-unit">average absolute error</span></div></div>
-        <div><div class="score-title">Exponential · RMSE</div><div class="score-card"><div class="score-number">${metricFormat(modelScore.rmse)}</div><span class="score-unit">penalizes larger misses</span></div></div>
-        <div><div class="score-title">Baseline · MAE</div><div class="score-card"><div class="score-number">${metricFormat(baselineScore.mae)}</div><span class="score-unit">last week repeated</span></div></div>
-        <div><div class="score-title">Baseline · RMSE</div><div class="score-card"><div class="score-number">${metricFormat(baselineScore.rmse)}</div><span class="score-unit">last week repeated</span></div></div>`;
-
-      const modelWins = modelScore.mae < baselineScore.mae;
-      const difference = baselineScore.mae > 0
-        ? Math.abs((baselineScore.mae - modelScore.mae) / baselineScore.mae) * 100
-        : 0;
-      byId("comparison").className = `comparison${modelWins ? " winner" : ""}`;
-      byId("comparison").innerHTML = modelWins
-        ? `<strong>Exponential smoothing had lower MAE</strong><span>It reduced average error by ${difference.toFixed(1)}% versus the baseline on the held-out weeks.</span>`
-        : `<strong>The naive baseline had lower MAE</strong><span>For this selection, repeating the last week was more accurate on the held-out weeks.</span>`;
-
-      const body = byId("forecast-rows");
-      body.replaceChildren();
-      futureWeeks.forEach((week, index) => {
-        const row = document.createElement("tr");
-        const dateCell = document.createElement("td");
-        const valueCell = document.createElement("td");
-        dateCell.textContent = dateLabel(week, { day: "numeric", month: "short", year: "numeric" });
-        valueCell.textContent = metricFormat(forecast[index]);
-        row.append(dateCell, valueCell);
-        body.append(row);
-      });
+        <div class="score"><span>Forecast · MAE</span><strong>${valueLabel(modelScore.mae)}</strong></div>
+        <div class="score"><span>Forecast · RMSE</span><strong>${valueLabel(modelScore.rmse)}</strong></div>
+        <div class="score"><span>Last week baseline · MAE</span><strong>${valueLabel(baselineScore.mae)}</strong></div>
+        <div class="score"><span>Last week baseline · RMSE</span><strong>${valueLabel(baselineScore.rmse)}</strong></div>`;
     }
 
     async function start() {
@@ -408,60 +328,40 @@
         const response = await fetch("./data/sales.json");
         if (!response.ok) throw new Error("Could not load the prepared sales data.");
         dataset = await response.json();
-        const market = dataset.market || "Online Retail (United Kingdom)";
-        const currency = dataset.currency || "GBP";
-        const productLabel = dataset.productLabel || "Product";
-        const sourceLink = byId("source-link");
-        sourceLink.href = dataset.sourceUrl || "https://archive.ics.uci.edu/dataset/352/online%2Bretail";
-        sourceLink.textContent = dataset.source || "UCI Online Retail";
-        byId("market-eyebrow").textContent = `Predictive analytics · ${market}`;
-        byId("market-name").textContent = market;
-        byId("period-badge").textContent = `${dateLabel(dataset.weeks[0], { month: "short", year: "numeric" })} — ${dateLabel(dataset.weeks.at(-1), { month: "short", year: "numeric" })}`;
-        byId("hero-description").textContent = dataset.currency === "INR"
-          ? "Explore Indian online retail categories, compare demand in rupees and units, and see a short-term forecast based on past orders."
-          : "Explore online retail products, compare demand over time, and see a short-term forecast based on past orders.";
-        byId("what-it-does").textContent = dataset.currency === "INR"
-          ? `This dashboard summarizes Amazon India orders by product category. Choose a category and forecast weekly revenue in ₹ (${currency}) or units sold for the next 1–12 weeks. The model learns from the available past weeks; it is a planning estimate, not a promise of future sales.`
-          : `This dashboard summarizes ${market} orders by product. Choose a product and forecast weekly revenue (${currency}) or units sold for the next 1–12 weeks. The model learns from the available past weeks; it is a planning estimate, not a promise of future sales.`;
-        byId("product-label").textContent = productLabel;
-        byId("product-stat-label").textContent = dataset.currency === "INR" ? "Categories in view" : "Active products";
-        byId("metric-select").querySelector('option[value="Revenue"]').textContent = `Revenue (${currency})`;
-        byId("top-title").textContent = dataset.currency === "INR" ? "Top categories" : "Top products";
-        byId("revenue-note").textContent = `${currency} · selected view`;
-        if (dataset.currency === "INR") {
-          byId("method-description").textContent = "Holt's exponential smoothing uses recent weekly sales and trend. MAE and RMSE compare its predictions on the final four observed weeks, held out from training, with a simple last-week baseline. The source covers only about three months, so treat longer forecasts as a classroom demonstration. Cancelled, returned, rejected, lost, or refunded orders are excluded.";
-        }
-        if (dataset.excludedTransactions) byId("filter-summary").textContent = `Excluded: ${dataset.excludedTransactions.toLowerCase()}.`;
+        if (dataset.currency !== "INR") throw new Error("The India sales data has not been prepared yet.");
 
-        const totals = new Map();
-        for (const [, productId, revenue] of dataset.rows) {
-          totals.set(productId, (totals.get(productId) || 0) + revenue);
-        }
-        const topIds = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
-        const select = byId("product-select");
+        byId("source-link").href = dataset.sourceUrl;
+        byId("source-link").textContent = dataset.source;
+        byId("period").textContent = `Using ${dataset.market} records from ${dateLabel(dataset.weeks[0], { day: "numeric", month: "short", year: "numeric" })} to ${dateLabel(dataset.weeks.at(-1), { day: "numeric", month: "short", year: "numeric" })}.`;
+        byId("validation-description").textContent = `A damped-trend Holt model carries the recent direction forward but gradually softens it over longer horizons. The final four of ${dataset.weeks.length} observed weeks are held back and forecast using earlier weeks, then compared with a baseline that repeats the last training week. This short history makes longer forecasts uncertain.`;
+
+        const select = byId("category-select");
         const all = document.createElement("option");
         all.value = "all";
-        all.textContent = dataset.currency === "INR" ? "All categories" : "All products";
+        all.textContent = "All categories";
         select.append(all);
-        for (const [productId] of topIds) {
+        dataset.products.forEach((product, id) => {
           const option = document.createElement("option");
-          option.value = productId;
-          option.textContent = dataset.products[productId];
+          option.value = id;
+          option.textContent = product;
           select.append(option);
-        }
-
+        });
+        select.addEventListener("change", render);
+        byId("horizon").addEventListener("input", render);
+        document.querySelectorAll("[data-metric]").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectedMetric = button.dataset.metric;
+            document.querySelectorAll("[data-metric]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+            render();
+          });
+        });
         byId("loading").hidden = true;
         byId("app").hidden = false;
         byId("status").textContent = "Sales data ready";
-        renderTopProducts();
         render();
-        ["product-select", "metric-select", "horizon"].forEach((id) => {
-          byId(id).addEventListener("input", render);
-          byId(id).addEventListener("change", render);
-        });
       } catch (error) {
         byId("loading").classList.add("error");
-        byId("loading").textContent = `${error.message} Run scripts/prepare_data.py and serve the docs folder, or check that docs/data/sales.json exists.`;
+        byId("loading").textContent = `${error.message} Please refresh the page or check the prepared sales data.`;
         byId("status").textContent = "Data unavailable";
       }
     }
